@@ -1,43 +1,34 @@
-const fs = require('fs')
+const fs = require('node:fs/promises')
 
-
-const loadData = () => {
+async function loadData() {
     try {
-        const dataBuffer = fs.readFileSync('data.json')
-        const dataJSON = dataBuffer.toString()
-        return JSON.parse(dataJSON)
-
+        const dataBuffer = await fs.readFile('data.json')
+        const dataJson = dataBuffer.toString()
+        return JSON.parse(dataJson)
     } catch(e) {
         return []
     }
 }
 
-const filterData = () => {
-    const data = loadData();
+async function filterData() {
+    const data = await loadData();
     const filteredData = [];
 
-    data.forEach((el) => {
-        filteredData.push(el.login + " " + el.id)
+    data.forEach(({ login, id }) => {
+        filteredData.push(`${login} ${id}`);
     })
-    saveFiltered(filteredData);
+    await saveData('filtered-data', filteredData);
+    return saveData('filtered-data-reversed', reverseFilteredData(filteredData))
 }
 
-const saveFiltered = (data) => {
-    let i = 0;
-    while (i < data.length) {
-        fs.appendFileSync('filteredData.txt', `${data[i]}\n`);
-        i++;
+async function saveData(filename, data) {
+    for (i = 0; i < data.length; i++) {
+        await fs.appendFile(filename, `${data[i]}\n`);
     }
-    reverseFiltered(data);
 }
 
-const reverseFiltered = (data) => {
-    let i = 0;
-    while ( i < data.length) {
-        const reversedElement = data[i].split("").reverse().join("");
-        fs.appendFileSync('filteredDataReversed.txt', `${reversedElement}\n`);
-        i++;
-    }
+function reverseFilteredData(data) {
+    return data.map(el => el.split('').reverse().join(''));
 }
 
 module.exports = {filterData};

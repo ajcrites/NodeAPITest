@@ -1,7 +1,5 @@
-const https = require('https')
-const fs = require('fs')
-
-
+const https = require('https');
+const fs = require('node:fs/promises');
 
 //GitHub API requires user-agent
 
@@ -13,35 +11,22 @@ function request() {
             method: 'GET',
             headers: {'user-agent': 'node.js'}
         };
-    
+
         https.get(options, (res) => {
-        
             let data = ''
-    
+
             res.on('data', (chunk) => {
                 data += chunk.toString('utf8');
             });
-    
-            //saveData(data);
-    
+
             //The whole response has been received. Print out the result.
-            res.on('end', () => {
-                // saveData(data);
-                //console.log("Data: ", data);
-                fs.writeFileSync('data.JSON', data);
-                console.log("finished saving data")
+            res.on('end', async () => {
+                await fs.writeFile('data.json', data);
                 resolve();
             });
 
         })
-    });   
-        //console.log("finished download data")
-        // const saveData = (data) => {
-        //     fs.writeFileSync('data.JSON', data);
-        //     console.log("finished saving data")
-
-        // };
-
+    });
 };
 
 

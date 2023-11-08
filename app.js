@@ -1,11 +1,21 @@
-const fs = require('fs');
+const fs = require('node:fs/promises');
 const data = require('./utils/download_data.js')
 const filter = require('./utils/filter.js')
 
 async function main() {
-  fs.truncateSync('data.JSON');
-  fs.truncateSync('filteredData.txt');
-  fs.truncateSync('filteredDataReversed.txt');
+  try {
+    await Promise.all([
+      fs.truncate('data.json'),
+      fs.truncate('filtered-data'),
+      fs.truncate('filtered-data-reversed'),
+    ]);
+  }
+  catch {
+    // This error is most likely that these files don't exist.
+    // The application code will create it, so we can swallow this error,
+    // but this is not best practice in the real world!
+  }
+
   await data.request();
   filter.filterData();
 }
