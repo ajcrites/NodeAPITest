@@ -1,8 +1,9 @@
-const fs = require('node:fs/promises')
+const fsPromises = require('node:fs/promises')
+const fs = require('fs')
 
 async function loadData() {
     try {
-        const dataBuffer = await fs.readFile('data.json')
+        const dataBuffer = await fsPromises.readFile('data.json')
         const dataJson = dataBuffer.toString()
         return JSON.parse(dataJson)
     } catch(e) {
@@ -10,21 +11,22 @@ async function loadData() {
     }
 }
 
-async function filterData() {
+async function filterData(filterDataCompleteCallback) {
     const data = await loadData();
-    const filteredData = [];
+    const filteredData = data.map(({ login, id }) => `${login} ${id}`);
 
-    data.forEach(({ login, id }) => {
-        filteredData.push(`${login} ${id}`);
-    })
-    await saveData('filtered-data', filteredData);
-    return saveData('filtered-data-reversed', reverseFilteredData(filteredData))
+    saveData('filtered-data', filteredData).on('finish', () => {
+      saveData('filtered-data-reversed', reverseFilteredData(filteredData))
+        .on('finish', filterDataCompleteCallback);
+    });
 }
 
-async function saveData(filename, data) {
-    for (i = 0; i < data.length; i++) {
-        await fs.appendFile(filename, `${data[i]}\n`);
-    }
+function saveData(filename, data) {
+    const fileWriteStream = fs.createWriteStream(filename);
+    data.forEach(user => fileWriteStream.write(`${user}\n`));
+    fileWriteStream.end();
+
+    return fileWriteStream;
 }
 
 function reverseFilteredData(data) {

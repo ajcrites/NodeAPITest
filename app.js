@@ -16,8 +16,12 @@ async function main() {
     // but this is not best practice in the real world!
   }
 
-  await data.request();
-  filter.filterData();
+  data.request(() => {
+    filter.filterData(() => {
+      console.log('done!');
+    });
+  });
 }
+
 main();
 
