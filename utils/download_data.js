@@ -6,7 +6,7 @@ const fs = require('fs')
 //GitHub API requires user-agent
 
 function request() {
-    return new Promise (() => {
+    return new Promise ((resolve) => {
         var options = {
             host: 'api.github.com',
             path: '/users',
@@ -30,6 +30,7 @@ function request() {
                 //console.log("Data: ", data);
                 fs.writeFileSync('data.JSON', data);
                 console.log("finished saving data")
+                resolve();
             });
 
         })
