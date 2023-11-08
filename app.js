@@ -17,7 +17,7 @@ async function main() {
   }
 
   data.request(() => {
-    filter.filterData(() => {
+    filter.loadAndFilterData(() => {
       console.log('done!');
     });
   });
